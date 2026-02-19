@@ -25,16 +25,14 @@ class UpdateSupplierRequest extends FormRequest
                 'string',
                 'max:18',
                 Rule::unique('suppliers', 'cnpj')
-                    ->ignore($supplier->id)
-                    ->whereNull('deleted_at'),
+                    ->ignore($supplier->id),
             ],
             'email' => [
                 'required',
                 'email',
                 'max:255',
                 Rule::unique('suppliers', 'email')
-                    ->ignore($supplier->id)
-                    ->whereNull('deleted_at'),
+                    ->ignore($supplier->id),
             ],
             'phone' => ['required', 'string', 'max:20'],
             'status' => ['required', Rule::in(['active', 'inactive'])],

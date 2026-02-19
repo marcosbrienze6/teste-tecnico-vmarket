@@ -75,23 +75,67 @@ function applyValidationErrors(error) {
   });
 }
 
+function digitsOnly(value) {
+  return String(value || '').replace(/\D/g, '');
+}
+
+function formatCnpj(value) {
+  const digits = digitsOnly(value).slice(0, 14);
+
+  if (digits.length <= 2) {
+    return digits;
+  }
+
+  if (digits.length <= 5) {
+    return `${digits.slice(0, 2)}.${digits.slice(2)}`;
+  }
+
+  if (digits.length <= 8) {
+    return `${digits.slice(0, 2)}.${digits.slice(2, 5)}.${digits.slice(5)}`;
+  }
+
+  if (digits.length <= 12) {
+    return `${digits.slice(0, 2)}.${digits.slice(2, 5)}.${digits.slice(5, 8)}/${digits.slice(8)}`;
+  }
+
+  return `${digits.slice(0, 2)}.${digits.slice(2, 5)}.${digits.slice(5, 8)}/${digits.slice(8, 12)}-${digits.slice(12)}`;
+}
+
+function formatPhone(value) {
+  const digits = digitsOnly(value).slice(0, 11);
+
+  if (digits.length <= 2) {
+    return digits;
+  }
+
+  if (digits.length <= 6) {
+    return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+  }
+
+  if (digits.length <= 10) {
+    return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+  }
+
+  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+}
+
 function sanitizeCnpjInput() {
-  form.cnpj = (form.cnpj || '').replace(/\D/g, '').slice(0, 11);
+  form.cnpj = formatCnpj(form.cnpj);
 }
 
 function sanitizePhoneInput() {
-  form.phone = (form.phone || '').replace(/\D/g, '').slice(0, 11);
+  form.phone = formatPhone(form.phone);
 }
 
 function validateFormBeforeSubmit() {
   resetErrors();
 
-  if (!/^\d{11}$/.test(form.cnpj || '')) {
-    formErrors.cnpj = 'CNPJ deve conter exatamente 11 numeros.';
+  if (!/^\d{14}$/.test(digitsOnly(form.cnpj))) {
+    formErrors.cnpj = 'CNPJ deve conter exatamente 14 numeros.';
   }
 
-  if (!/^\d+$/.test(form.phone || '')) {
-    formErrors.phone = 'Telefone deve conter apenas numeros.';
+  if (!/^\d{10,11}$/.test(digitsOnly(form.phone))) {
+    formErrors.phone = 'Telefone deve conter 10 ou 11 numeros.';
   }
 
   return !formErrors.cnpj && !formErrors.phone;
@@ -127,12 +171,10 @@ async function loadSuppliers(url = null) {
 function editSupplier(supplier) {
   editingId.value = supplier.id;
   form.name = supplier.name;
-  form.cnpj = supplier.cnpj;
+  form.cnpj = formatCnpj(supplier.cnpj);
   form.email = supplier.email;
-  form.phone = supplier.phone;
+  form.phone = formatPhone(supplier.phone);
   form.status = supplier.status;
-  sanitizeCnpjInput();
-  sanitizePhoneInput();
   resetErrors();
 }
 
@@ -145,11 +187,17 @@ async function submitForm() {
   }
 
   try {
+    const payload = {
+      ...form,
+      cnpj: digitsOnly(form.cnpj),
+      phone: digitsOnly(form.phone),
+    };
+
     if (editingId.value) {
-      await window.axios.put(`/api/v1/suppliers/${editingId.value}`, form);
+      await window.axios.put(`/api/v1/suppliers/${editingId.value}`, payload);
       showFlash('success', 'Fornecedor atualizado com sucesso.');
     } else {
-      await window.axios.post('/api/v1/suppliers', form);
+      await window.axios.post('/api/v1/suppliers', payload);
       showFlash('success', 'Fornecedor criado com sucesso.');
     }
 
@@ -232,7 +280,7 @@ onMounted(() => {
                 v-model="form.cnpj"
                 type="text"
                 inputmode="numeric"
-                maxlength="11"
+                maxlength="18"
                 class="w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                 @input="sanitizeCnpjInput"
               />
@@ -251,7 +299,7 @@ onMounted(() => {
                 v-model="form.phone"
                 type="text"
                 inputmode="numeric"
-                maxlength="11"
+                maxlength="15"
                 class="w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                 @input="sanitizePhoneInput"
               />

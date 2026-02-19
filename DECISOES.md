@@ -47,6 +47,21 @@
 - Endpoint de status: `GET /api/v1/batch-operations/{id}`.
 - Worker local: `php artisan queue:work redis`.
 
+## Desafios de criatividade escolhidos
+- Opcao A (Experiencia do usuario):
+  - Filtro de pedidos por status e fornecedor.
+  - Busca e filtros nas telas de produtos, fornecedores e vinculos.
+  - Interface dedicada para vinculo/desvinculo em massa com feedback de processamento.
+
+- Opcao B (Regra de negocio):
+  - Bloqueio de criacao de pedido para fornecedor inativo.
+  - Bloqueio de edicao de pedido concluido (com mudanca de status tratada em endpoint dedicado).
+  
+- Opcao C (Organizacao tecnica):
+    - Uso de Services para encapsular regras de negocio (OrderService, ProductSupplierService, etc.).
+    - Controllers focados em orquestracao HTTP e validacao.
+    - Melhor separacao de responsabilidades e reaproveitamento de codigo.
+
 ## Uso de IA
 - IA foi usada para acelerar tarefas repetitivas (estrutura inicial e refactors).
 - Todas as sugestoes foram revisadas, adaptadas e validadas manualmente.
