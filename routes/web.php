@@ -22,6 +22,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/fornecedores', function () {
         return Inertia::render('Suppliers/Index');
     })->name('suppliers.page');
+
+    Route::get('/produtos', function () {
+        return Inertia::render('Products/Index');
+    })->name('products.page');
 });
 
 Route::middleware('auth')->group(function () {
