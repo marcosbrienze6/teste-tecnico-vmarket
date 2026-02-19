@@ -16,8 +16,8 @@ class StoreSupplierRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'cnpj' => ['required', 'string', 'max:18', 'unique:suppliers,cnpj'],
-            'email' => ['required', 'email', 'max:255', 'unique:suppliers,email'],
+            'cnpj' => ['required', 'string', 'max:18', Rule::unique('suppliers', 'cnpj')->whereNull('deleted_at')],
+            'email' => ['required', 'email', 'max:255', Rule::unique('suppliers', 'email')->whereNull('deleted_at')],
             'phone' => ['required', 'string', 'max:20'],
             'status' => ['required', Rule::in(['active', 'inactive'])],
         ];
