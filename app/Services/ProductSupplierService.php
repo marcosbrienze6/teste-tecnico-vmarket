@@ -39,15 +39,15 @@ class ProductSupplierService
 
     public function linkMany(Product $product, array $supplierIds): array
     {
-        return $product->suppliers()->syncWithoutDetaching($this->sanitizeIds($supplierIds));
+        return $product->suppliers()->syncWithoutDetaching($this->normalizeIds($supplierIds));
     }
 
     public function unlinkMany(Product $product, array $supplierIds): int
     {
-        return $product->suppliers()->detach($this->sanitizeIds($supplierIds));
+        return $product->suppliers()->detach($this->normalizeIds($supplierIds));
     }
 
-    private function sanitizeIds(array $ids): array
+    public function normalizeIds(array $ids): array
     {
         return array_values(array_unique(array_filter(array_map('intval', $ids), fn (int $id) => $id > 0)));
     }
