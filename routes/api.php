@@ -16,6 +16,7 @@ Route::prefix('v1')->group(function (): void {
     Route::delete('products/{product}/suppliers/{supplier}', [ProductSupplierController::class, 'destroy']);
     Route::post('products/{product}/suppliers/bulk-link', [ProductSupplierController::class, 'bulkStore']);
     Route::post('products/{product}/suppliers/bulk-unlink', [ProductSupplierController::class, 'bulkDestroy']);
+    Route::get('suppliers/{supplier}/products', [ProductSupplierController::class, 'products']);
     Route::get('batch-operations/{batchOperation}', [BatchOperationController::class, 'show']);
 
     Route::apiResource('orders', OrderController::class)->only(['index', 'store', 'show', 'update']);

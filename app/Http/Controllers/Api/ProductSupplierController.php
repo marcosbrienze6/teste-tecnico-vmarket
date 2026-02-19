@@ -30,7 +30,7 @@ class ProductSupplierController extends Controller
 
     public function store(LinkSupplierRequest $request, Product $product): JsonResponse
     {
-        $supplier = Supplier::query()->findOrFail((int) $request->validated('supplier_id'));
+        $supplier = $this->productSupplierService->findSupplierOrFail((int) $request->validated('supplier_id'));
         $this->productSupplierService->link($product, $supplier);
 
         return response()->json(['message' => 'Fornecedor vinculado com sucesso.']);
@@ -71,5 +71,15 @@ class ProductSupplierController extends Controller
                 'status' => $operation->status,
             ],
         ], 202);
+    }
+
+    public function products(Supplier $supplier): JsonResponse
+    {
+        $products = $this->productSupplierService->paginateProductsBySupplier(
+            $supplier,
+            request()->only(['q', 'status'])
+        );
+
+        return response()->json($products);
     }
 }
