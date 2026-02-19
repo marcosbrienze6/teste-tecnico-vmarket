@@ -40,6 +40,7 @@ class OrderService
         if (isset($data['supplier_id']) && (int) $data['supplier_id'] !== (int) $order->supplier_id) {
             $supplier = Supplier::query()->findOrFail((int) $data['supplier_id']);
             $this->assertSupplierIsActive($supplier);
+            $this->assertAllItemsAreLinkedToSupplier($order, $supplier);
         }
 
         $order->update($data);
@@ -145,6 +146,36 @@ class OrderService
     {
         if (!$order->items()->exists()) {
             throw new BusinessRuleException('O pedido deve possuir ao menos um item.');
+        }
+    }
+
+    private function assertAllItemsAreLinkedToSupplier(Order $order, Supplier $supplier): void
+    {
+        if (!$order->items()->exists()) {
+            return;
+        }
+
+        $orderProductIds = $order->items()
+            ->pluck('product_id')
+            ->map(fn ($id): int => (int) $id)
+            ->unique()
+            ->values()
+            ->all();
+
+        $linkedProductIds = $supplier->products()
+            ->whereIn('products.id', $orderProductIds)
+            ->pluck('products.id')
+            ->map(fn ($id): int => (int) $id)
+            ->unique()
+            ->values()
+            ->all();
+
+        $missingProductIds = array_values(array_diff($orderProductIds, $linkedProductIds));
+
+        if (!empty($missingProductIds)) {
+            throw new BusinessRuleException(
+                'Nao e permitido trocar o fornecedor: existem itens do pedido sem vinculo com o novo fornecedor.'
+            );
         }
     }
 }
