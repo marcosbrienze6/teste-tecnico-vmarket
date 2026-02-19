@@ -7,6 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class BatchOperation extends Model
 {
+    public const TYPE_LINK = 'link';
+    public const TYPE_UNLINK = 'unlink';
+
+    public const STATUS_PENDING = 'pending';
+    public const STATUS_PROCESSING = 'processing';
+    public const STATUS_DONE = 'done';
+    public const STATUS_FAILED = 'failed';
+
     protected $table = 'batch_operations';
 
     protected $fillable = [
