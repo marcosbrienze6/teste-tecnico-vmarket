@@ -27,6 +27,33 @@ class ProductSupplierService
             ->withQueryString();
     }
 
+    public function paginateProductsBySupplier(
+        Supplier $supplier,
+        array $filters = [],
+        int $perPage = 50
+    ): LengthAwarePaginator {
+        return $supplier->products()
+            ->when(!empty($filters['q']), function ($query) use ($filters): void {
+                $term = trim((string) $filters['q']);
+                $query->where(function ($innerQuery) use ($term): void {
+                    $innerQuery->where('name', 'like', "%{$term}%")
+                        ->orWhere('internal_code', 'like', "%{$term}%")
+                        ->orWhere('description', 'like', "%{$term}%");
+                });
+            })
+            ->when(!empty($filters['status']), function ($query) use ($filters): void {
+                $query->where('status', (string) $filters['status']);
+            })
+            ->orderBy('name')
+            ->paginate($perPage)
+            ->withQueryString();
+    }
+
+    public function findSupplierOrFail(int $supplierId): Supplier
+    {
+        return Supplier::query()->findOrFail($supplierId);
+    }
+
     public function link(Product $product, Supplier $supplier): void
     {
         $product->suppliers()->syncWithoutDetaching([$supplier->id]);

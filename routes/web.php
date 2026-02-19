@@ -30,6 +30,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/vinculos', function () {
         return Inertia::render('ProductSuppliers/Index');
     })->name('product-suppliers.page');
+
+    Route::get('/pedidos', function () {
+        return Inertia::render('OrdersIndex');
+    })->name('orders.index.page');
+
+    Route::get('/pedidos/{order}', function (int $order) {
+        return Inertia::render('OrdersShow', [
+            'orderId' => $order,
+        ]);
+    })->name('orders.details.page');
 });
 
 Route::middleware('auth')->group(function () {
